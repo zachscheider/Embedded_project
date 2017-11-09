@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView image;
     TextView status;
     boolean flag = true;
+    boolean flag2 = true;
 
     BluetoothSocket mmSocket;
     BluetoothDevice mmDevice = null;
@@ -39,29 +40,53 @@ public class MainActivity extends AppCompatActivity {
     final byte delimiter = 33;
     int readBufferPosition = 0;
 
+    public String motor = "1";
 
-    public void sendBtMsg(String msg2send){
-        //UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
-        UUID uuid = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee"); //Standard SerialPortService ID
+    public void connectPi(){
         try {
+            UUID uuid = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee"); //Standard SerialPortService ID
 
             mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-            status.setText(mmDevice.getName());
-
-            if (!mmSocket.isConnected()){
+            if (!mmSocket.isConnected()) {
                 mmSocket.connect();
-                status.setText(mmDevice.getName());
+                System.out.println("connected?");
+                //status.setText(mmDevice.getName());
             }
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-            String msg = msg2send;
+    public void sendBtMsg(String msg2send){
+        System.out.println("sendBtMsg!");
+        //UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
+        //UUID uuid = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee"); //Standard SerialPortService ID
+        //UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
+
+        try {
+            //mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+
+            //status.setText(mmDevice.getName());
+            //mmSocket.connect();
+
+            //if (!mmSocket.isConnected()){
+               // mmSocket.connect();
+                //System.out.println("connected?");
+                //status.setText(mmDevice.getName());
+            //}
+
+           String msg = msg2send;
             //msg += "\n";
             OutputStream mmOutputStream = mmSocket.getOutputStream();
             mmOutputStream.write(msg.getBytes());
-
+            System.out.println("done trying...");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
 
     }
 
@@ -74,22 +99,27 @@ public class MainActivity extends AppCompatActivity {
         status = (TextView) findViewById(R.id.status);
 
         final Handler handler = new Handler();
-
+        Log.d("MyApp","Here1");
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        //connectPi();
         final class workerThread implements Runnable {
 
             private String btMsg;
 
             public workerThread(String msg) {
                 btMsg = msg;
+                System.out.println("new thread!");
             }
 
             public void run()
             {
+                Log.d("MyApp","Now here2");
                 sendBtMsg(btMsg);
+                /*
                 while(!Thread.currentThread().isInterrupted())
                 {
+                    System.out.println("in while!");
                     int bytesAvailable;
                     boolean workDone = false;
 
@@ -98,11 +128,21 @@ public class MainActivity extends AppCompatActivity {
 
 
                         final InputStream mmInputStream;
+                        System.out.println("after input");
+                        System.out.println(mmSocket);
+
                         mmInputStream = mmSocket.getInputStream();
+
+                        System.out.println("after mmsocket");
                         bytesAvailable = mmInputStream.available();
+                        System.out.println(bytesAvailable);
+
+                        //mmSocket.close();
+
                         if(bytesAvailable > 0)
                         {
 
+                            //System.out.println("in the if");
                             byte[] packetBytes = new byte[bytesAvailable];
                             Log.e("Aquarium recv bt","bytes available");
                             byte[] readBuffer = new byte[1024];
@@ -126,8 +166,9 @@ public class MainActivity extends AppCompatActivity {
                                             //myLabel.setText(data);
                                         }
                                     });
-
+                                    System.out.println("work done");
                                     workDone = true;
+
                                     break;
 
 
@@ -139,19 +180,22 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             if (workDone == true){
-                                mmSocket.close();
+                               // mmSocket.close();
                                 break;
                             }
 
+
                         }
+                        break;
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
 
-                }
+                }*/
             }
         };
+        //(new Thread(new workerThread("1"))).start();
 
         image.setOnClickListener(new View.OnClickListener() {
 
@@ -159,20 +203,27 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Perform action on temp button click
 
+                if(flag2) {
+                    //(new Thread(new workerThread(motor))).start();
+                    flag2 = false;
+                }
+
                 switch(v.getId()){
                     case R.id.imageView2:{
                         if(flag)
                         {
                             image.setImageResource(R.drawable.redlock);
                             status.setText("Locked");
-                            //(new Thread(new workerThread("1"))).start();
+                            //motor = "1";
+                            (new Thread(new workerThread("1"))).start();
                             flag=false;
                         }
                         else
                         {
                             image.setImageResource(R.drawable.unlocked);
                             status.setText("Unlocked");
-                            //(new Thread(new workerThread("0"))).start();
+                            //motor = "0";
+                            (new Thread(new workerThread("0"))).start();
                             flag=true;
                         }
                         return;
@@ -197,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
                     //Log.e("Aquarium",device.getName());
                     //myLabel.setText(device.getName());
                     mmDevice = device;
+                    connectPi();
                     break;
                 }
             }
