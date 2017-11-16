@@ -116,6 +116,14 @@ public class MainActivity extends AppCompatActivity {
             {
                 Log.d("MyApp","Now here2");
                 sendBtMsg(btMsg);
+
+                //wait for the socket to go down; aka disconnected from the pi.
+                //Then turn the motor to locked
+                //while(mmSocket.isConnected())
+                //{
+                    //Just keeps the the program here until connection fails
+                //}
+                //(new Thread(new workerThread("0)).start();
                 /*
                 while(!Thread.currentThread().isInterrupted())
                 {
@@ -196,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         //(new Thread(new workerThread("1"))).start();
-
+        /*
         image.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -231,25 +239,28 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
-        });
-        if(!mBluetoothAdapter.isEnabled())
-        {
-            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBluetooth, 0);
-        }
+        });*/
+        while(true) {
+            if (!mBluetoothAdapter.isEnabled()) {
+                //Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                //startActivityForResult(enableBluetooth, 0);
+                BluetoothAdapter.getDefaultAdapter().enable();
+            }
 
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        if(pairedDevices.size() > 0)
-        {
-            for(BluetoothDevice device : pairedDevices)
-            {
-                if(device.getName().equals("raspberrypi")) //Note, you will need to change this to match the name of your device
-                {
-                    //Log.e("Aquarium",device.getName());
-                    //myLabel.setText(device.getName());
-                    mmDevice = device;
-                    connectPi();
-                    break;
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                for (BluetoothDevice device : pairedDevices) {
+                    if (device.getName().equals("raspberrypi")) //Note, you will need to change this to match the name of your device
+                    {
+                        //Log.e("Aquarium",device.getName());
+                        //myLabel.setText(device.getName());
+                        mmDevice = device;
+                        connectPi();
+                        if (mmSocket.isConnected()) {
+                            //(new Thread(new workerThread("1"))).start();
+                        }
+                        break;
+                    }
                 }
             }
         }
