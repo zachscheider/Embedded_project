@@ -63,35 +63,45 @@ while True:
     #rssi_out = out.split(' ')
     #rssi = int(rssi_out[3])
     #print rssi #This is the RSSI value
+    status = -1
+
     try:
-        while True:
-            print "hello"
-            exitcode, out, err = get_exitcode_stdout_stderr(cmd)
-            rssi_out = out.split(' ')
-            print "out",out
-            if(out != ""):
-                rssi = int(rssi_out[3])
-            else:
-                break
-                
-            print "rssi", rssi #This is the RSSI value
+        while True:            
+            count = 0
+            for i in range(20):
+                exitcode, out, err = get_exitcode_stdout_stderr(cmd)
+                rssi_out = out.split(' ')
+                print "out",out
+                if(out != ""):
+                    rssi = int(rssi_out[3])
+                    count += rssi
+                else:
+                    break
+            count/=20
+            
+            print "count", count #This is the RSSI value
 
             #data = client_sock.recv(1024)
             
             #if data == '0':
-            if rssi < 0:
+
+            if count < -5 and status!=0: #locked
                 pwm.ChangeDutyCycle(2)
+                status = 0
                 #print "received [%s]" % data
             #elif data == '1':
-            elif rssi >= 0:
+            elif count >= 0 and status!=1: #unlocked
+                status = 1
                 pwm.ChangeDutyCycle(7)
                 #if len(data) == 0: break
                 #print "received [%s]" % data
-            time.sleep(2)
+            
+            time.sleep(3)
     except IOError:
         pass
     
     pwm.ChangeDutyCycle(2)
+    sleep(10)
     print "disconnected"
 
     client_sock.close()
