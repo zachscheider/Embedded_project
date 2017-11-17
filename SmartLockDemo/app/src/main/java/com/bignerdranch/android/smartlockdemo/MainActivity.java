@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             public void run()
             {
                 Log.d("MyApp","Now here2");
-                sendBtMsg(btMsg);
+                //sendBtMsg(btMsg);
 
                 //wait for the socket to go down; aka disconnected from the pi.
                 //Then turn the motor to locked
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     //Just keeps the the program here until connection fails
                 //}
                 //(new Thread(new workerThread("0)).start();
-                /*
+
                 while(!Thread.currentThread().isInterrupted())
                 {
                     System.out.println("in while!");
@@ -172,6 +172,15 @@ public class MainActivity extends AppCompatActivity {
                                         public void run()
                                         {
                                             //myLabel.setText(data);
+                                            System.out.println(data);
+                                            if(data.equals("locked")) {
+                                                image.setImageResource(R.drawable.redlock);
+                                                status.setText("Locked");
+                                            }
+                                            if(data.equals("unlocked")) {
+                                                image.setImageResource(R.drawable.unlocked);
+                                                status.setText("Unlocked");
+                                            }
                                         }
                                     });
                                     System.out.println("work done");
@@ -200,11 +209,47 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                }*/
+                }
             }
         };
-        //(new Thread(new workerThread("1"))).start();
-        /*
+        final class connectionChecker implements Runnable {
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            public connectionChecker() {
+
+            }
+
+            public void run() {
+                while (true) {
+                    //(new Thread(new workerThread("status"))).start();
+
+                        if (!mBluetoothAdapter.isEnabled()) {
+                            //Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                            //startActivityForResult(enableBluetooth, 0);
+                            BluetoothAdapter.getDefaultAdapter().enable();
+                        }
+                    if(!mmSocket.isConnected()) {
+                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                        if (pairedDevices.size() > 0) {
+                            for (BluetoothDevice device : pairedDevices) {
+                                if (device.getName().equals("raspberrypi")) //Note, you will need to change this to match the name of your device
+                                {
+                                    //Log.e("Aquarium",device.getName());
+                                    //myLabel.setText(device.getName());
+                                    mmDevice = device;
+                                    connectPi();
+                                    if (mmSocket.isConnected()) {
+                                        //(new Thread(new workerThread("status"))).start();
+                                    }
+                                    break;
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
         image.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -239,8 +284,9 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
-        });*/
-        while(true) {
+        });
+
+        //while(true) {
             if (!mBluetoothAdapter.isEnabled()) {
                 //Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 //startActivityForResult(enableBluetooth, 0);
@@ -257,37 +303,15 @@ public class MainActivity extends AppCompatActivity {
                         mmDevice = device;
                         connectPi();
                         if (mmSocket.isConnected()) {
-                            //(new Thread(new workerThread("1"))).start();
+                            //(new Thread(new connectionChecker())).start();
                         }
                         break;
                     }
                 }
             }
-        }
+        //}
     }
-/*
-    public void onClick(View view) {
-        switch(view.getId()){
-            case R.id.imageView2:{
-                if(flag)
-                {
-                    image.setImageResource(R.drawable.redlock);
-                    status.setText("Locked");
-                    (new Thread(new workerThread("1"))).start();
-                    flag=false;
-                }
-                else
-                {
-                    image.setImageResource(R.drawable.unlocked);
-                    status.setText("Unlocked");
-                    (new Thread(new workerThread("0"))).start();
-                    flag=true;
-                }
-                return;
-            }
-        }
-    }
-    */
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
