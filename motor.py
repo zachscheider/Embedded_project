@@ -28,6 +28,8 @@ def get_exitcode_stdout_stderr(cmd):
     #
     return exitcode, out, err
 
+# Tyler's phone = E4:FA:ED:7F:25:F5
+# Max's phone = F8:E6:1A:92:93:C2
 cmd = "hcitool rssi E4:FA:ED:7F:25:F5"  # arbitrary external command, e.g. "python mytest.py"
 exitcode, out, err = get_exitcode_stdout_stderr(cmd)
 
@@ -57,42 +59,58 @@ while True:
     client_sock, client_info = server_sock.accept()
     print "Accepted connection from ", client_info
     exitcode, out, err = get_exitcode_stdout_stderr(cmd)
-    print "exitcode ", exitcode
-    print "out ", out
-    print "err ", err
-    #rssi_out = out.split(' ')
-    #rssi = int(rssi_out[3])
-    #print rssi #This is the RSSI value
+    client_sock.setblocking(0)
+    
+    
     status = -1
 
+## SHOW ANY CONNECTION BETWEEN PI AND ANDROID APP
+    #data = 'connectedddd!'
+    #client_sock.send(data)
+##
+    
     try:
         while True:            
             count = 0
+            b=0
             for i in range(20):
                 exitcode, out, err = get_exitcode_stdout_stderr(cmd)
                 rssi_out = out.split(' ')
                 print "out",out
+                
+                
                 if(out != ""):
                     rssi = int(rssi_out[3])
                     count += rssi
                 else:
+                    print "here I am"
+                    b=1
                     break
+            if b == 1:
+                break
+               
             count/=20
             
             print "count", count #This is the RSSI value
-
             #data = client_sock.recv(1024)
-            
+            #if not data: break
+				
             #if data == '0':
 
             if count < -5 and status!=0: #locked
                 pwm.ChangeDutyCycle(2)
                 status = 0
+                data = "locked!"
+                client_sock.send(data)
+                time.sleep(5)
                 #print "received [%s]" % data
             #elif data == '1':
             elif count >= 0 and status!=1: #unlocked
                 status = 1
                 pwm.ChangeDutyCycle(7)
+                data = "unlocked!"
+                client_sock.send(data)
+                time.sleep(5)
                 #if len(data) == 0: break
                 #print "received [%s]" % data
             
@@ -101,7 +119,7 @@ while True:
         pass
     
     pwm.ChangeDutyCycle(2)
-    sleep(10)
+    #time.sleep(10)
     print "disconnected"
 
     client_sock.close()
