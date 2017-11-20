@@ -13,15 +13,6 @@
     tools:context="com.bignerdranch.android.smartlockdemo.MainActivity">
 
 
-    <Button
-        android:text="LOCK LOG"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="44dp"/>
-
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,6 +31,25 @@
         android:layout_above="@+id/imageView2"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:text="LOCK LOG"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button"
+        android:onClick="openLog"
+        android:layout_below="@+id/imageView2"
+        android:layout_toStartOf="@+id/status"
+        android:layout_marginEnd="11dp"/>
+
+    <Button
+        android:text="Delete Log"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/delete"
+        android:onClick="deleteLockLog"
+        android:layout_below="@+id/imageView2"
+        android:layout_toEndOf="@+id/status"/>
 
 
 </RelativeLayout>

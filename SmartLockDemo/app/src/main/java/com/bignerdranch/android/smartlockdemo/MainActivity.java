@@ -5,8 +5,12 @@ package com.bignerdranch.android.smartlockdemo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
+import java.net.Socket;
+import java.lang.Object;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -20,6 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,6 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
     ImageView image;
     TextView status;
+    Button logButton;
+    Button delete;
+    MyDBHandler dbHandler;
+
     boolean flag = true;
     boolean flag2 = true;
 
@@ -41,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     int readBufferPosition = 0;
 
     public String motor = "1";
+
+    EditText mainInput;
+    TextView output;
 
     public void connectPi(){
         try {
@@ -97,24 +109,41 @@ public class MainActivity extends AppCompatActivity {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
         image = (ImageView) findViewById(R.id.imageView2);
         status = (TextView) findViewById(R.id.status);
+        logButton = (Button) findViewById(R.id.button);
+        delete = (Button) findViewById(R.id.delete);
+        dbHandler = new MyDBHandler(this,null,null,1);
 
         final Handler handler = new Handler();
         Log.d("MyApp","Here1");
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //connectPi();
+        final class buttonThread implements Runnable {
+
+            private String btMsg;
+
+            public buttonThread(String msg) {
+                btMsg = msg;
+                System.out.println("new thread!");
+            }
+
+            public void run() {
+                Log.d("MyApp", "Button Thread....................");
+                sendBtMsg(btMsg);
+            }
+        };
         final class workerThread implements Runnable {
 
             private String btMsg;
 
             public workerThread(String msg) {
                 btMsg = msg;
-                System.out.println("new thread!");
+                //System.out.println("new thread!");
             }
 
             public void run()
             {
-                Log.d("MyApp","Now here2");
+                //Log.d("MyApp","Now here2");
                 //sendBtMsg(btMsg);
 
                 //wait for the socket to go down; aka disconnected from the pi.
@@ -176,11 +205,26 @@ public class MainActivity extends AppCompatActivity {
                                             if(data.equals("locked")) {
                                                 image.setImageResource(R.drawable.redlock);
                                                 status.setText("Locked");
+
+                                                //Capture for log
+                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                                                String currentDateandTime = sdf.format(new Date());
+                                                //String currentDateandTime = "test";
+                                                Products product = new Products(currentDateandTime);
+                                                dbHandler.addProducts(product);
                                             }
                                             if(data.equals("unlocked")) {
                                                 image.setImageResource(R.drawable.unlocked);
                                                 status.setText("Unlocked");
+
+                                                //Capture for log
+                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                                                String currentDateandTime = sdf.format(new Date());
+                                                //String currentDateandTime = "test";
+                                                Products product = new Products(currentDateandTime);
+                                                dbHandler.addProducts(product);
                                             }
+
                                         }
                                     });
                                     System.out.println("work done");
@@ -220,32 +264,43 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void run() {
+                System.out.println(mmSocket.isConnected());
+                //(new Thread(new workerThread("status"))).start();
                 while (true) {
-                    //(new Thread(new workerThread("status"))).start();
-
+                    (new Thread(new workerThread("status"))).start();
+                    try {
+                        Log.d("My App", "In the while!!!");
                         if (!mBluetoothAdapter.isEnabled()) {
                             //Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                             //startActivityForResult(enableBluetooth, 0);
                             BluetoothAdapter.getDefaultAdapter().enable();
+                            //mmSocket.close();
                         }
-                    if(!mmSocket.isConnected()) {
-                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                        if (pairedDevices.size() > 0) {
-                            for (BluetoothDevice device : pairedDevices) {
-                                if (device.getName().equals("raspberrypi")) //Note, you will need to change this to match the name of your device
-                                {
-                                    //Log.e("Aquarium",device.getName());
-                                    //myLabel.setText(device.getName());
-                                    mmDevice = device;
-                                    connectPi();
-                                    if (mmSocket.isConnected()) {
-                                        //(new Thread(new workerThread("status"))).start();
-                                    }
-                                    break;
 
+                        if (!mmSocket.isConnected()) {
+                            mmSocket.close();
+                            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                            if (pairedDevices.size() > 0) {
+                                for (BluetoothDevice device : pairedDevices) {
+                                    if (device.getName().equals("raspberrypi")) //Note, you will need to change this to match the name of your device
+                                    {
+                                        //Log.e("Aquarium",device.getName());
+                                        //myLabel.setText(device.getName());
+                                        mmDevice = device;
+                                        connectPi();
+                                        if (mmSocket.isConnected()) {
+                                            //(new Thread(new workerThread("status"))).start();
+                                        }
+                                        break;
+
+                                    }
                                 }
                             }
                         }
+                    }
+                    catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
                 }
             }
@@ -268,7 +323,8 @@ public class MainActivity extends AppCompatActivity {
                             image.setImageResource(R.drawable.redlock);
                             status.setText("Locked");
                             //motor = "1";
-                            (new Thread(new workerThread("1"))).start();
+                            //(new Thread(new buttonThread("1"))).start();
+                            //(new Thread(new connectionChecker())).start();
                             flag=false;
                         }
                         else
@@ -276,7 +332,8 @@ public class MainActivity extends AppCompatActivity {
                             image.setImageResource(R.drawable.unlocked);
                             status.setText("Unlocked");
                             //motor = "0";
-                            (new Thread(new workerThread("0"))).start();
+                            //(new Thread(new buttonThread("0"))).start();
+                            //(new Thread(new connectionChecker())).start();
                             flag=true;
                         }
                         return;
@@ -285,6 +342,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
 
         //while(true) {
             if (!mBluetoothAdapter.isEnabled()) {
@@ -303,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
                         mmDevice = device;
                         connectPi();
                         if (mmSocket.isConnected()) {
-                            //(new Thread(new connectionChecker())).start();
+                            (new Thread(new connectionChecker())).start();
                         }
                         break;
                     }
@@ -311,6 +369,20 @@ public class MainActivity extends AppCompatActivity {
             }
         //}
     }
+    //Open the Log
+    public void openLog(View view){
+        Intent i = new Intent(this,Unlocked.class);
+        String dbString = dbHandler.databaseToString();
+        i.putExtra("log",dbString);
+        startActivity(i);
+    }
+
+    //Delete the Log
+    public void deleteLockLog(View view){
+        dbHandler.deleteAll();
+    }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 

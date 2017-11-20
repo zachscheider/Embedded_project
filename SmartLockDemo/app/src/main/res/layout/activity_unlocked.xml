@@ -11,41 +11,23 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.bignerdranch.android.smartlockdemo.Unlocked">
-    <TextView
-        android:text="Locked"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:id="@+id/textView4"
-        android:layout_below="@+id/textView"
-        android:layout_alignStart="@+id/textView"/>
 
     <TextView
-        android:text="Status:"
+        android:text="Lock Log"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginBottom="29dp"
         android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/button"/>
-
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/unlocked"
-        android:id="@+id/imageButton"
-        android:layout_centerVertical="true"
+        tools:textSize="24sp"
         android:layout_centerHorizontal="true"
-        android:onClick="onClick"/>
+        android:textSize="30sp"/>
 
-    <Button
-        android:text="LOCK LOG"
+    <TextView
+        android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button"
-        android:layout_below="@+id/imageButton"
-        android:layout_centerHorizontal="true"/>
-
-
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/output"
+        android:textSize="18sp"/>
 </RelativeLayout>
