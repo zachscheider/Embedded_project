@@ -27,10 +27,11 @@ def get_exitcode_stdout_stderr(cmd):
     exitcode = proc.returncode
     #
     return exitcode, out, err
-
+#initially sleep so bluetooth can be loaded; otherwise program will not start
+# time.sleep(20)
 # Tyler's phone = E4:FA:ED:7F:25:F5
 # Max's phone = F8:E6:1A:92:93:C2
-cmd = "hcitool rssi E4:FA:ED:7F:25:F5"  # arbitrary external command, e.g. "python mytest.py"
+cmd = "hcitool rssi F8:E6:1A:92:93:C2"  # arbitrary external command, e.g. "python mytest.py"
 exitcode, out, err = get_exitcode_stdout_stderr(cmd)
 
 GPIO.setmode(GPIO.BOARD)
@@ -38,7 +39,7 @@ GPIO.setup(11,GPIO.OUT)
 pwm=GPIO.PWM(11,50)
 pwm.start(5)
 
-pwm.ChangeDutyCycle(2)
+pwm.ChangeDutyCycle(12)
 while True:
     server_sock=BluetoothSocket( RFCOMM )
     server_sock.bind(("",PORT_ANY))
@@ -92,19 +93,44 @@ while True:
             count/=20
             
             print "count", count #This is the RSSI value
-            #data = client_sock.recv(1024)
-            #if not data: break
-				
-            #if data == '0':
 
-            if count < -5 and status!=0: #locked
-                pwm.ChangeDutyCycle(2)
+            #data from pi
+            '''
+            try:
+                #time.sleep(1)
+                data = client_sock.recv(1024)
+                
+                print data
+                if data == '0':
+                    pwm.ChangeDutyCycle(2)
+                    status = 0
+                    data = "locked!"
+                    client_sock.send(data)
+                    #time.sleep(5)
+                    pass
+                elif data == '1':
+                    status = 1
+                    pwm.ChangeDutyCycle(7)
+                    data = "unlocked!"
+                    client_sock.send(data)
+                    #time.sleep(5)
+                    pass
+                    
+            except:
+                data = -1 #no data received
+                pass
+            '''
+            #Functional portion w/ RSSI values
+            #Locked
+            if count < -5 and status!=0: #locked           
+                pwm.ChangeDutyCycle(12)
                 status = 0
                 data = "locked!"
                 client_sock.send(data)
                 time.sleep(5)
                 #print "received [%s]" % data
             #elif data == '1':
+            #Unlocked
             elif count >= 0 and status!=1: #unlocked
                 status = 1
                 pwm.ChangeDutyCycle(7)
