@@ -208,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
 
                                                 //Capture for log
                                                 StringBuilder SB = new StringBuilder();
-                                                SB.append("LOCK\t\t\t : \t");
-                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                                                SB.append("LOCK      : \t");
+                                                SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
                                                 String currentDateandTime = sdf.format(new Date());
                                                 SB.append(currentDateandTime);
                                                 //String currentDateandTime = "test";
@@ -222,8 +222,8 @@ public class MainActivity extends AppCompatActivity {
 
                                                 //Capture for log
                                                 StringBuilder SB = new StringBuilder();
-                                                SB.append("UNLOCK\t\t\t : \t");
-                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                                                SB.append("UNLOCK : \t");
+                                                SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
                                                 String currentDateandTime = sdf.format(new Date());
                                                 //String currentDateandTime = "test";
                                                 SB.append(currentDateandTime);
@@ -387,8 +387,6 @@ public class MainActivity extends AppCompatActivity {
     public void deleteLockLog(View view){
         dbHandler.deleteAll();
     }
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
