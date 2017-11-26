@@ -27,7 +27,7 @@ public class Unlocked extends AppCompatActivity {
     }
 
     //Print the log
-    public void printDatabase(){
+    public void printDatabase() {
         String dbString = dbHandler.databaseToString();
         output.setText(dbString);
     }

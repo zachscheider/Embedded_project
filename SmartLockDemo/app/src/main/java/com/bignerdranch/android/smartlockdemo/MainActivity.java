@@ -207,10 +207,13 @@ public class MainActivity extends AppCompatActivity {
                                                 status.setText("Locked");
 
                                                 //Capture for log
+                                                StringBuilder SB = new StringBuilder();
+                                                SB.append("LOCK\t\t\t : \t");
                                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
                                                 String currentDateandTime = sdf.format(new Date());
+                                                SB.append(currentDateandTime);
                                                 //String currentDateandTime = "test";
-                                                Products product = new Products(currentDateandTime);
+                                                Products product = new Products(SB.toString());
                                                 dbHandler.addProducts(product);
                                             }
                                             if(data.equals("unlocked")) {
@@ -218,10 +221,13 @@ public class MainActivity extends AppCompatActivity {
                                                 status.setText("Unlocked");
 
                                                 //Capture for log
+                                                StringBuilder SB = new StringBuilder();
+                                                SB.append("UNLOCK\t\t\t : \t");
                                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
                                                 String currentDateandTime = sdf.format(new Date());
                                                 //String currentDateandTime = "test";
-                                                Products product = new Products(currentDateandTime);
+                                                SB.append(currentDateandTime);
+                                                Products product = new Products(SB.toString());
                                                 dbHandler.addProducts(product);
                                             }
 
